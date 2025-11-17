@@ -1,0 +1,1666 @@
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Discover Kalaburagi - Historic City of Karnataka</title>
+  <script src="/_sdk/element_sdk.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+      color: #2c3e50;
+      overflow-x: hidden;
+    }
+    
+    html, body {
+      height: 100%;
+    }
+    
+    .navbar {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      padding: 1rem 5%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 1000;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      transition: all 0.3s ease;
+    }
+    
+    .navbar.scrolled {
+      padding: 0.5rem 5%;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    }
+    
+    .logo {
+      font-size: 1.8rem;
+      font-weight: bold;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      /* keep background on the container so the existing script can update it;
+         the visible gradient will be applied to .logo-text via background: inherit */
+    }
+
+    /* the text part shows the gradient using the container background
+       Provide a solid-color fallback so the title remains visible when
+       background-clip:text isn't supported or the gradient isn't applied. */
+    .logo-text {
+      display: inline-block;
+      color: rgb(166, 75, 196); /* pink/purple requested */
+      font-weight: 700;
+      -webkit-text-fill-color: initial; /* ensure emoji/text rendering isn't forced transparent */
+      text-decoration: none;
+    }
+
+    /* emoji should render as the native colored glyph (not clipped/transparent)
+       make it visible and readable across browsers */
+    .logo-emoji {
+      font-family: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", "Segoe UI Symbol", sans-serif;
+      -webkit-text-fill-color: initial !important;
+      color: #2c3e50; /* fallback solid color for the emoji */
+      display: inline-block;
+      line-height: 1;
+      font-size: 1.15em;
+    }
+    
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    /* Mobile nav toggle */
+    .nav-toggle {
+      display: none;
+      background: transparent;
+      border: none;
+      font-size: 1.6rem;
+      cursor: pointer;
+      color: #2c3e50;
+      padding: 8px;
+      z-index: 1101;
+    }
+    
+    .nav-links a {
+      text-decoration: none;
+      color: #2c3e50;
+      font-weight: 500;
+      transition: color 0.3s ease;
+      position: relative;
+    }
+    
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      bottom: -5px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      transition: width 0.3s ease;
+    }
+    
+    .nav-links a:hover::after {
+      width: 100%;
+    }
+    
+    .hero {
+      min-height: 95vh; /* cover the entrance screen */
+      background: linear-gradient(135deg, #667eea 0%, #f4f2f6 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 6rem 5% 4rem;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    /* make carousel act as a full-hero background
+       it will sit absolutely inside .hero and fill it */
+    .carousel-container {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      max-width: none;
+      margin: 0;
+      border-radius: 0;
+      overflow: hidden;
+      box-shadow: none;
+      z-index: 0;
+    }
+    
+    .carousel-slides {
+      width: 100%;
+      height: 100%;
+      position: relative;
+    }
+    
+    .carousel-slide {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      transition: opacity 1s ease-in-out;
+    }
+    
+    .carousel-slide.active {
+      opacity: 1;
+    }
+    
+    .carousel-slide img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      -o-object-fit: cover;
+    }
+
+    /* use CSS background on slides for crisper scaling where possible */
+    .carousel-slide {
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      will-change: transform;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      transform: translateZ(0);
+    }
+    
+    .carousel-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(255,255,255,0.3);
+      color: white;
+      border: none;
+      font-size: 2rem;
+      padding: 1rem 1.5rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      z-index: 1; /* behind hero content */
+      border-radius: 5px;
+    }
+    
+    .carousel-btn:hover {
+      background: rgba(255,255,255,0.5);
+    }
+    
+    .carousel-btn.prev {
+      left: 20px;
+    }
+    
+    .carousel-btn.next {
+      right: 20px;
+    }
+    
+    .carousel-dots {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 10px;
+      z-index: 1; /* behind hero content */
+    }
+    
+    .carousel-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.5);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .carousel-dot.active {
+      background: white;
+      width: 30px;
+      border-radius: 6px;
+    }
+    
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="2" fill="white" opacity="0.1"/></svg>');
+      animation: float 20s linear infinite;
+      pointer-events: none;
+    }
+    
+    @keyframes float {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(-100px); }
+    }
+    
+    .hero-content {
+      position: relative;
+      z-index: 2; /* sit above the carousel background */
+      max-width: 800px;
+      padding: 2rem; /* ensure content has breathing room over images */
+      color: rgb(231, 116, 44); /* hero content typically white over background images */
+      text-shadow: 0 2px 8px rgba(228, 84, 12, 0.928);
+    }
+    
+    .hero h1 {
+      font-size: 4rem;
+      color: white;
+      margin-bottom: 1rem;
+      animation: fadeInUp 1s ease;
+    }
+    
+    .hero .tagline {
+      font-size: 1.5rem;
+      color: rgba(255,255,255,0.9);
+      margin-bottom: 1rem;
+      animation: fadeInUp 1s ease 0.2s backwards;
+    }
+    
+    .hero p {
+      font-size: 1.2rem;
+      color: rgba(255,255,255,0.85);
+      margin-bottom: 2rem;
+      animation: fadeInUp 1s ease 0.4s backwards;
+    }
+    
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .cta-button {
+      display: inline-block;
+      padding: 1rem 2.5rem;
+      background: white;
+      color: #667eea;
+      text-decoration: none;
+      border-radius: 50px;
+      font-weight: 600;
+      font-size: 1.1rem;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      animation: fadeInUp 1s ease 0.6s backwards;
+    }
+    
+    .cta-button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 25px rgba(0,0,0,0.3);
+    }
+    
+    .section {
+      padding: 5rem 5%;
+    }
+    
+    .section-title {
+      font-size: 2.5rem;
+      text-align: center;
+      margin-bottom: 3rem;
+      color: #2c3e50;
+      position: relative;
+    }
+    
+    .section-title::after {
+      content: '';
+      display: block;
+      width: 80px;
+      height: 4px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      margin: 1rem auto 0;
+      border-radius: 2px;
+    }
+    
+    .about-content {
+      max-width: 900px;
+      margin: 0 auto;
+      text-align: center;
+      font-size: 1.1rem;
+      line-height: 1.8;
+      color: #555;
+    }
+    
+    .attractions-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    .attraction-card {
+      background: white;
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+    
+    .attraction-card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+    
+    .attraction-icon {
+      height: 200px;
+      display: block;
+      overflow: hidden;
+      border-top-left-radius: 15px;
+      border-top-right-radius: 15px;
+      background: #f0f0f0; /* light placeholder while image loads */
+    }
+
+    .attraction-icon img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    
+    .attraction-card:nth-child(2) .attraction-icon {
+      background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    }
+    
+    .attraction-card:nth-child(3) .attraction-icon {
+      background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+    }
+    
+    .attraction-card:nth-child(4) .attraction-icon {
+      background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+    }
+    
+    .attraction-info {
+      padding: 1.5rem;
+    }
+    
+    .blog-image {
+      height: 250px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .blog-featured-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.3s ease;
+    }
+
+    .blog-card:hover .blog-featured-image {
+      transform: scale(1.05);
+    }
+    
+    .attraction-info h3 {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+      color: #2c3e50;
+    }
+    
+    .attraction-info p {
+      color: #666;
+      line-height: 1.6;
+    }
+    
+    .culture-section {
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    }
+    
+    .culture-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    .culture-item {
+      background: white;
+      padding: 2rem;
+      border-radius: 15px;
+      text-align: center;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      transition: all 0.3s ease;
+    }
+    
+    .culture-item:hover {
+      transform: scale(1.05);
+    }
+    
+    .culture-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+    
+    .culture-item h3 {
+      font-size: 1.3rem;
+      margin-bottom: 0.5rem;
+      color: #2c3e50;
+    }
+    
+    .culture-item p {
+      color: #666;
+    }
+    
+    .blog-section {
+      background: #f8f9fa;
+    }
+    
+    .blog-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 2.5rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    .blog-card {
+      background: white;
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+      transition: all 0.3s ease;
+      border-left: 4px solid transparent;
+      display: flex; /* allow flexible vertical sizing */
+      flex-direction: column;
+    }
+
+    .blog-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+      border-left-color: #667eea;
+    }
+    
+    .blog-image {
+      width: 100%;
+      height: 200px;
+      overflow: hidden;
+      background: #f0f0f0;
+    }
+    
+    .blog-image svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+    
+    .blog-card .blog-header,
+    .blog-card h3,
+    .blog-card p,
+    .blog-card .read-more {
+      padding-left: 2rem;
+      padding-right: 2rem;
+    }
+    
+    .blog-card .blog-header {
+      padding-top: 1.5rem;
+    }
+    
+    .blog-card .read-more {
+      padding-bottom: 2rem;
+      display: inline-block;
+      margin-top: auto; /* push the link to the bottom when card grows */
+    }
+    
+    .blog-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    
+    .blog-category {
+      display: inline-block;
+      padding: 0.4rem 1rem;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+    
+    .blog-date {
+      color: #999;
+      font-size: 0.9rem;
+    }
+    
+    .blog-card h3 {
+      font-size: 1.5rem;
+      color: #2c3e50;
+      margin-bottom: 1rem;
+      line-height: 1.4;
+    }
+    
+    .blog-card p {
+      color: #555;
+      line-height: 1.8;
+      margin-bottom: 1rem;
+    }
+    
+    .read-more {
+      display: inline-block;
+      color: #667eea;
+      text-decoration: none;
+      font-weight: 600;
+      margin-top: 0.5rem;
+      transition: all 0.3s ease;
+    }
+    
+    .read-more:hover {
+      color: #764ba2;
+      transform: translateX(5px);
+    }
+    
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 2.5rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    .gallery-card {
+      background: white;
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+      transition: all 0.3s ease;
+    }
+    
+    .gallery-card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+    }
+    
+    .gallery-image {
+      width: 100%;
+      height: 250px;
+      overflow: hidden;
+      background: #f0f0f0;
+    }
+    
+    .gallery-image svg,
+    .gallery-image img,
+    .gallery-image .gallery-img {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: cover;
+    }
+
+    /* Rating stars inside gallery cards */
+    .rating {
+      display: inline-flex;
+      gap: 6px;
+      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+
+    .rating svg {
+      width: 18px;
+      height: 18px;
+      display: block;
+      flex: 0 0 auto;
+    }
+
+    .rating .sr-only {
+      position: absolute !important;
+      width: 1px; height: 1px; padding: 0; margin: -1px;
+      overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+    }
+    
+    .gallery-info {
+      padding: 1.5rem;
+    }
+    
+    .gallery-info h3 {
+      font-size: 1.5rem;
+      margin-bottom: 0.8rem;
+      color: #2c3e50;
+    }
+    
+    .gallery-info p {
+      color: #666;
+      line-height: 1.6;
+      margin-bottom: 1rem;
+    }
+    
+    .location-link {
+      display: inline-block;
+      padding: 0.6rem 1.2rem;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      text-decoration: none;
+      border-radius: 25px;
+      font-weight: 500;
+      font-size: 0.95rem;
+      transition: all 0.3s ease;
+    }
+    
+    .location-link:hover {
+      transform: translateX(5px);
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+    
+    .footer {
+      background: #2c3e50;
+      color: white;
+      text-align: center;
+      padding: 3rem 5% 2rem;
+    }
+    
+    .footer p {
+      margin-bottom: 0.5rem;
+    }
+    
+    .social-links {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      margin: 2rem 0 1.5rem;
+    }
+    
+    .social-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: white;
+      text-decoration: none;
+      font-size: 1.1rem;
+      transition: all 0.3s ease;
+      padding: 0.5rem 1rem;
+      border-radius: 25px;
+      background: rgba(255, 255, 255, 0.1);
+    }
+    
+    .social-link:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateY(-3px);
+    }
+    
+    .social-icon {
+      font-size: 1.5rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+    }
+    
+    .social-icon svg {
+      width: 100%;
+      height: 100%;
+    }
+    
+    @media (max-width: 768px) {
+      .hero {
+        padding: 4rem 4% 3rem;
+      }
+
+      /* remove the decorative/animated pseudo-background on mobile
+         to avoid unwanted pink/animated artifacts that overlap the hero */
+      .hero::before {
+        display: none !important;
+        background: none !important;
+        animation: none !important;
+      }
+
+      .hero h1 {
+        font-size: 2rem;
+      }
+      
+      .hero .tagline {
+        font-size: 1.1rem;
+      }
+      
+
+      /* make hamburger clearly visible and tappable */
+      .nav-toggle { display: block; margin-left: 12px; font-size: 1.8rem; }
+
+      /* menu is absolutely positioned and hidden by scaleY when closed */
+      .nav-links {
+        position: absolute;
+        top: calc(100% + 8px);
+        right: 10px;
+        background: rgba(255,255,255,0.98);
+        flex-direction: column;
+        gap: 0;
+        width: 220px;
+        box-shadow: 0 6px 24px rgba(0,0,0,0.12);
+        border-radius: 8px;
+        padding: 10px 0;
+        transform-origin: top right;
+        transform: scaleY(0);
+        transition: transform 0.22s ease, opacity 0.22s ease;
+        overflow: hidden;
+        pointer-events: none;
+        opacity: 0;
+        z-index: 1100;
+      }
+
+      /* when navbar has .open, reveal the menu */
+      .navbar.open .nav-links { transform: scaleY(1); pointer-events: auto; opacity: 1; }
+
+      .nav-links li { padding: 0.5rem 1rem; }
+
+      .nav-links a { display: block; padding: 0.5rem 0; }
+      
+      .carousel-container {
+        max-width: 100%;
+        height: 240px;
+        border-radius: 12px;
+        margin-bottom: 1.5rem;
+      }
+
+      /* Responsive gallery adjustments */
+      .gallery-grid {
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1rem;
+      }
+
+      .gallery-image { height: 180px; }
+
+      /* stack gallery & culture into single column on small screens */
+      @media (max-width: 600px) {
+        .gallery-grid, .culture-grid { grid-template-columns: 1fr; gap: 0.8rem; }
+        .gallery-image { height: 160px; }
+      }
+
+      .carousel-caption {
+        padding: 12px;
+      }
+
+      .carousel-caption h2 { font-size: 1.05rem; }
+      .carousel-caption p  { font-size: 0.95rem; }
+
+      .carousel-btn {
+        top: unset;
+        bottom: 90px;
+        width: 36px;
+        height: 36px;
+        font-size: 1.2rem;
+        padding: 0;
+        border-radius: 50%;
+      }
+
+      .carousel-dots { bottom: 12px; }
+
+      .cta-button { padding: 0.8rem 1.6rem; font-size: 1rem; }
+
+      .section { padding: 2rem 4%; }
+      
+      .section-title { font-size: 1.8rem; }
+    }
+
+    @media (max-width: 420px) {
+      .hero h1 { font-size: 1.6rem; }
+      .carousel-container { height: 200px; }
+      .carousel-caption h2 { font-size: 1rem; }
+      .carousel-btn { bottom: 70px; width: 32px; height: 32px; font-size: 1rem; }
+    }
+
+    /* Blog Styles */
+    .blog-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 2rem;
+      padding: 2rem 0;
+    }
+    
+    .blog-card {
+      background: white;
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      transition: transform 0.3s ease;
+      display: flex; /* ensure vertical stacking and autosize */
+      flex-direction: column;
+    }
+    
+    .map-card {
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    padding: 24px;
+    max-width: 400px;
+    text-align: center;
+    margin: 20px auto;
+  }
+
+  .map-card h2 {
+    margin-bottom: 12px;
+    color: #333;
+  }
+
+  .map-card p {
+    color: #666;
+    font-size: 15px;
+    margin-bottom: 20px;
+  }
+
+  .map-button {
+    display: inline-flex;
+    align-items: center;
+    padding: 12px 20px;
+    background-color: #0078D7;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 600;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: background-color 0.3s ease;
+  }
+
+  .map-button:hover {
+    background-color: #005fa3;
+  }
+
+  .map-button svg {
+    margin-right: 8px;
+  }
+    .blog-card:hover {
+      transform: translateY(-5px);
+    }
+    
+    .blog-image {
+      height: 250px;
+      overflow: hidden;
+    }
+    
+    .blog-featured-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .blog-header {
+      padding: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .blog-category {
+      background: #007bff;
+      color: white;
+      padding: 0.25rem 0.75rem;
+      border-radius: 15px;
+    }
+    
+    .blog-form-container {
+      max-width: 800px;
+      margin: 2rem auto;
+      padding: 2rem;
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .blog-form {
+      display: grid;
+      gap: 1rem;
+    }
+    
+    .blog-form input,
+    .blog-form textarea {
+      padding: 0.75rem;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+    }
+    
+    .blog-form button {
+      background: #007bff;
+      color: white;
+      padding: 0.75rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    
+    /* Ensure blog card internal layout auto-scales */
+    .blog-card .blog-image { flex: 0 0 auto; }
+    .blog-card .blog-header { flex: 0 0 auto; }
+    .blog-card h3 { flex: 0 0 auto; }
+    .blog-card p { flex: 0 0 auto; }
+    .blog-card .read-more { margin-top: auto; }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
+ </head>
+ <body>
+  <nav class="navbar" id="navbar">
+   <div class="logo" id="logo" aria-label="Explore Kalaburagi">
+    <span class="logo-emoji" aria-hidden="true">🏛️</span>
+    <span class="logo-text">Explore-Kalaburagi</span>
+   </div>
+   <button class="nav-toggle" id="navToggle" aria-label="Toggle menu" aria-expanded="false">☰</button>
+   <ul class="nav-links" id="navLinks">
+    <li><a href="#home">Home</a></li>
+    <li><a href="#about">About</a></li>
+    <li><a href="#blog">Travel Guide</a></li>
+    <li><a href="#attractions">Attractions</a></li>
+    <li><a href="#gallery">Gallery</a></li>
+    <li><a href="#culture">Culture</a></li>
+   </ul>
+  </nav>
+  <section class="hero" id="home">
+   <div class="carousel-container">
+    <div class="carousel-slides" id="carousel">
+  <div class="carousel-slide active">
+   <img loading="lazy" src="foorts.webp" alt="Shre Sharanabasaveshwara Temple">
+      <div class="carousel-caption">
+        <h2>Shre Sharanabasaveshwara Temple</h2>
+        <p>Spiritual and cultural landmark of the region</p>
+      </div>
+     </div>
+  <div class="carousel-slide">
+   <img loading="lazy" src="sb21.jpg" alt="Gulbarga Fort">
+      <div class="carousel-caption">
+        <h2>Gulbarga Fort</h2>
+        <p>Historical fortress showcasing medieval architecture</p>
+      </div>
+     </div>
+     <div class="carousel-slide">
+   <img loading="lazy" src="bv.avif" alt="Gulbarga Fort">
+      <div class="carousel-caption">
+        <h2>Gulbarga Fort</h2>
+        <p>Historical fortress showcasing medieval architecture</p>
+      </div>
+     </div>
+    </div>
+    <button class="carousel-btn prev" onclick="moveCarousel(-1)">❮</button>
+    <button class="carousel-btn next" onclick="moveCarousel(1)">❯</button>
+    <div class="carousel-dots" id="carousel-dots"></div>
+   </div>
+   <div class="hero-content">
+    <h1 id="city-name">Kalaburagi</h1>
+    <div class="tagline" id="tagline">
+     Where History Meets Heritage
+    </div>
+    <p id="hero-description">Your comprehensive guide to exploring the ancient capital of the Bahmani Sultanate</p><a href="#blog" class="cta-button" id="cta-button">Read More</a>
+   </div>
+  </section>
+  <section class="section" id="about">
+   <h2 class="section-title" id="about-title">About Kalaburagi</h2>
+   <div class="about-content">
+    <p>Kalaburagi, formerly known as Gulbarga, is a historic city in northern Karnataka that served as the first capital of the Bahmani Sultanate. This ancient city is renowned for its magnificent Indo-Islamic architecture, including the famous Jama Masjid, one of the oldest mosques in India. The city is also a significant pilgrimage center, home to the revered Khwaja Banda Nawaz Dargah, attracting devotees from across the country.</p><br>
+    <p>With its rich tapestry of history spanning over 600 years, Kalaburagi offers visitors a unique glimpse into medieval Indian architecture, Sufi culture, and the legacy of the Deccan Sultanates.</p>
+   </div>
+  </section>
+  <section class="section" id="attractions">
+   <h2 class="section-title" id="attractions-title">Must-Visit Attractions</h2>
+   <div class="attractions-grid">
+  <div class="attraction-card">
+   <div class="attraction-icon">
+    <img loading="lazy" src="KBN.jpg" alt="Khwaja Banda Nawaz Dargah">
+   </div>
+   <div class="attraction-info">
+    <h3>Khwaja Banda Nawaz Dargah</h3>
+    <p>A revered Sufi shrine and spiritual center, attracting thousands of devotees. The complex features beautiful Persian architecture and peaceful gardens.</p>
+   </div>
+  </div>
+  <div class="attraction-card">
+   <div class="attraction-icon">
+    <img loading="lazy" src="kport.jpeg" alt="Gulbarga Fort">
+   </div>
+   <div class="attraction-info">
+    <h3>Gulbarga Fort</h3>
+    <p>A massive 14th-century fort with impressive ramparts, bastions, and the unique Jama Masjid inside, showcasing Persian architectural influence.</p>
+   </div>
+  </div>
+  <div class="attraction-card">
+   <div class="attraction-icon">
+    <img loading="lazy" src="sb21.jpg" alt="Sharana Basaveshwara Temple">
+   </div>
+   <div class="attraction-info">
+    <h3>Sharana Basaveshwara Temple</h3>
+    <p>An important pilgrimage site dedicated to the 12th-century philosopher-saint, featuring stunning Chalukyan architecture and intricate carvings.</p>
+   </div>
+  </div>
+  <div class="attraction-card">
+   <div class="attraction-icon">
+    <img loading="lazy" src="bv.webp" alt="Buddha Vihar">
+   </div>
+   <div class="attraction-info">
+    <h3>Buddha Vihar</h3>
+    <p>A serene Buddhist monastery and meditation center, offering peaceful surroundings and insights into Buddhist philosophy and practices.</p>
+   </div>
+  </div>
+  
+  <div class="attraction-card">
+   <div class="attraction-icon">
+    <img loading="lazy" src="GVS.jpg" alt="Gulbarga Fort">
+   </div>
+   <div class="attraction-info">
+    <h3>Gavisiddeshwara Temple</h3>
+    <p>A Tucked away in the rocky heart of Kalaburagi, this mysterious cave temple remains one of the city's best-kept secrets. Carved into ancient stone and accessible only through a narrow, dimly lit passage, the temple exudes an aura of timeless spirituality and intrigue</p>
+   </div>
+  </div>
+
+   </div>
+  </section>
+  <section class="section blog-section" id="blog">
+   <h2 class="section-title" id="blog-title">Explore Kalaburagi - Travel Guide &amp; History</h2>
+   <div class="blog-grid">
+
+    <article class="blog-card">
+     <div class="blog-image">
+        <img src="sb21.jpg" alt="Shri Sharanabasaveshwara Temple" class="blog-featured-image" loading="lazy">
+     </div>
+     <div class="blog-header"><span class="blog-category">History</span> <span class="blog-date">📅 Updated 2025</span>
+     </div>
+     <h3>Shri Sharanabasaveshwara Temple</h3>
+     <p>The history of the Sharana Basaveshwara Temple in Kalaburagi dates back centuries, dedicated to an 18th-century Lingayat saint known for his philosophy of Dasoha and Kayaka. The central shrine houses the samadhi (final resting place) of Sharana Basaveshwara. The temple's architecture is a blend of Hindu and Islamic styles, with detailed carvings on the walls, pillars, and arches, and it has been a spiritual and cultural center for centuries</p>
+      
+     <div class="map-card"> 
+  <a class="map-button" href="https://maps.app.goo.gl/zGvPEh1CrnhuxJyW8" target="_blank">
+    <svg xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 0 24 24" width="20" fill="#ffffff">
+      <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5S10.62 6.5 12 6.5s2.5 1.12 2.5 2.5S13.38 11.5 12 11.5z"/>
+    </svg>
+    Go to Location
+  </a>
+</div>
+  </a>
+     </article>
+
+    <article class="blog-card">
+     <div class="blog-image">
+        <img src="KBN.jpg" alt="Bahmani Era Historical Site" class="blog-featured-image" loading="lazy">
+     </div>
+     <div class="blog-header"><span class="blog-category">History</span> <span class="blog-date">📅 Updated 2025</span>
+     </div>
+     <h3>Khwaja bande Nawaj Darga</h3>
+     <p>Kalaburagi served as the first capital of the Bahmani Sultanate from 1347 to 1424 AD. Founded by Alauddin Bahman Shah, this powerful kingdom ruled the Deccan region for nearly 180 years. The city's strategic location made it a center of power, culture, and trade.</p>
+    
+     <div class="map-card"> 
+  <a class="map-button" href="https://maps.app.goo.gl/ihfSzM3Ui4u94UPr7" target="_blank">
+    <svg xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 0 24 24" width="20" fill="#ffffff">
+      <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5S10.62 6.5 12 6.5s2.5 1.12 2.5 2.5S13.38 11.5 12 11.5z"/>
+    </svg>
+    Go to Location
+  </a>
+</div>
+  </a>
+     </article>
+
+    <article class="blog-card">
+     <div class="blog-image">
+        <img src="GVS.jpg" alt="Bahmani Era Historical Site" class="blog-featured-image" loading="lazy">
+     </div>
+     <div class="blog-header"><span class="blog-category">History</span> <span class="blog-date">📅 Updated 2025</span>
+     </div>
+     <h3>Shri Gavisiddeshwara Temple </h3>
+     <p>In the vibrant city of Kalaburagi, the Gavisiddeshwara Temple stands as a living testament to centuries of devotion, culture, and natural wonder. Estimated to be between 300 to 500 years old, this sacred temple is not only a spiritual sanctuary but also home to a magnificent banyan tree believed to be over 500 years old — a rare fusion of heritage and nature.</p>
+    
+    <div class="map-card"> 
+  <a class="map-button" href="https://maps.app.goo.gl/9p1nZXKMALsupV1E8" target="_blank">
+    <svg xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 0 24 24" width="20" fill="#ffffff">
+      <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5S10.62 6.5 12 6.5s2.5 1.12 2.5 2.5S13.38 11.5 12 11.5z"/>
+    </svg>
+    Go to Location
+  </a>
+</div>
+  </a>
+     </article>
+
+    <article class="blog-card">
+     <div class="blog-image">
+        <img src="Budha.jpeg"Bahmani Era Historical Site" class="blog-featured-image" loading="lazy">
+     </div>
+     <div class="blog-header"><span class="blog-category">History</span> <span class="blog-date">📅 Updated 2025</span>
+     </div>
+     <h3>Buddha Vihar</h3>
+     <p>In the vibrant city of Kalaburagi, the Gavisiddeshwara Temple stands as a living testament to centuries of devotion, culture, and natural wonder. Estimated to be between 300 to 500 years old, this sacred temple is not only a spiritual sanctuary but also home to a magnificent banyan tree believed to be over 500 years old — a rare fusion of heritage and nature.</p>
+    
+    <div class="map-card"> 
+  <a class="map-button" href="https://maps.app.goo.gl/Ne83TVqS3zAdcpPA9" target="_blank">
+    <svg xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 0 24 24" width="20" fill="#ffffff">
+      <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5S10.62 6.5 12 6.5s2.5 1.12 2.5 2.5S13.38 11.5 12 11.5z"/>
+    </svg>
+    Go to Location
+  </a>
+</div>
+  </a>
+     </article>
+
+    <article class="blog-card">
+     <div class="blog-image">
+        <img src="Toph.webp" alt="Bahmani Era Historical Site" class="blog-featured-image" loading="lazy">
+     </div>
+     <div class="blog-header"><span class="blog-category">History</span> <span class="blog-date">📅 Updated 2025</span>
+     </div>
+     <h3>Bara Gazi Toph Kalaburagi</h3>
+     <p>The Bara Gazi Toph proudly occupies the ramparts of the Gulbarga Fort, a majestic 14th-century citadel that once served as the Bahmani capital. Reaching the fort is a breeze, located in the heart of Kalaburagi city, easily accessible by road, rail, and air. The nearest railway station is Kalaburagi Railway Station, and the closest airport is Kalaburagi Airport. Once within the fort, prepare to be awestruck by the sheer presence of the Bara Gazi Toph, standing sentinel against the backdrop of history.</p>
+    <div class="map-card"> 
+  <a class="map-button" href="https://maps.app.goo.gl/3brFdXM2QgXvfaa97" target="_blank">
+    <svg xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 0 24 24" width="20" fill="#ffffff">
+      <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5S10.62 6.5 12 6.5s2.5 1.12 2.5 2.5S13.38 11.5 12 11.5z"/>
+    </svg>
+    Go to Location
+  </a>
+</div>
+  </a>
+     </article>
+
+ <article class="blog-card">
+     <div class="blog-image">
+        <img src="VSN.jpg" alt="Bahmani Era Historical Site" class="blog-featured-image" loading="lazy">
+     </div>
+     <div class="blog-header"><span class="blog-category">History</span> <span class="blog-date">📅 Updated 2025</span>
+     </div>
+     <h3>Sri Vaishnodevi Temple </h3>
+     <p>The Sri Vaishnodevi Devasthana in Kalaburagi is a temple built in the form of a cave, replicating the famous Vaishno Devi Temple in Jammu. It is a relatively recent addition to the city's tourist attractions, designed by a devotee after his wishes were fulfilled by Mata Vaishnodev</p>
+   
+   <div class="map-card"> 
+  <a class="map-button" href="https://maps.app.goo.gl/ea6GH1pYmam8Ea1g7" target="_blank">
+    <svg xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 0 24 24" width="20" fill="#ffffff">
+      <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5S10.62 6.5 12 6.5s2.5 1.12 2.5 2.5S13.38 11.5 12 11.5z"/>
+    </svg>
+    Go to Location
+  </a>
+</div>
+  </a>
+     </article>
+
+   </div>
+  </section>
+  
+  <section class="section" id="gallery">
+   <h2 class="section-title" id="gallery-title">Gallery</h2>
+   <div class="gallery-grid">
+  
+    <div class="gallery-card">
+     <div class="gallery-image">
+      <img src="KBNtm.jpg" alt="KBN" class="gallery-img" loading="lazy">
+     </div>
+     <div class="gallery-info">
+      <h3>Khwaja bande Nawaj Darga </h3>
+      <p>Kalaburagi’s legacy as the first capital of the Bahmani Sultanate is truly captivating. From 1347 to 1424 AD, it flourished under Alauddin Bahman Shah’s rule, shaping Deccan history. The city’s strategic location made it a vibrant hub of culture, trade, and governance. A must-visit for anyone intrigued by medieval Indian heritage.</p><a href="https://maps.app.goo.gl/NB4K11UDS5xeKJz19" target="_blank" rel="noopener noreferrer" class="location-link"> 📍 View on Map </a>
+     </div>
+    </div>
+    
+    <div class="gallery-card">
+     <div class="gallery-image">
+      <img src="GVtm.jpg" alt="Shri Gavisiddeshwara Temple " class="gallery-img" loading="lazy">
+     </div>
+     <div class="gallery-info">
+      <h3>Shri Gavisiddeshwara Temple </h3>
+      <p>Shri Gavisiddeshwara Temple in Kalaburagi is a serene haven of devotion and history. Its ancient stone-carved sanctum exudes timeless spiritual energy. The temple’s age, estimated between 300 to 500 years, adds to its mystique. A majestic 500-year-old banyan tree within the complex beautifully blends heritage with nature</p><a href="https://maps.app.goo.gl/qEGeJFspw7sH47M37" target="_blank" rel="noopener noreferrer" class="location-link"> 📍 View on Map </a>
+     </div>
+    </div>
+
+     <div class="gallery-card">
+     <div class="gallery-image">
+      <img src="porttm.jpg" alt="Bara Gazi Toph Kalaburagi" class="gallery-img" loading="lazy">
+     </div>
+     <div class="gallery-info">
+      <h3>Bara Gazi Toph Kalaburagi</h3>
+      <p>The Bara Gazi Toph at Gulbarga Fort is a striking relic of Bahmani-era grandeur. Perched atop the fort’s ramparts, it commands awe with its sheer size and historic presence. The fort’s central location makes it easily accessible by road, rail, and air. A must-visit for history lovers exploring Kalaburagi’s royal past.</p><a href="https://maps.app.goo.gl/hAaERHvfMkDSsN5j6" target="_blank" rel="noopener noreferrer" class="location-link"> 📍 View on Map </a>
+     </div>
+    </div>
+
+     <div class="gallery-card">
+     <div class="gallery-image">
+      <img src="VSN.jpg" alt="Sharana Basaveshwara Temple" class="gallery-img" loading="lazy">
+     </div>
+     <div class="gallery-info">
+      <h3>Vaishnavidevi Temple </h3>
+      <p>Sri Vaishnodevi Devasthana in Kalaburagi is a captivating cave-style temple inspired by the iconic shrine in Jammu. Though a recent addition, it beautifully blends devotion with architectural charm. Built by a devotee in gratitude to Mata Vaishnodevi, the temple radiates spiritual warmth. A peaceful and meaningful stop for pilgrims and tourists alike.</p><a href="https://maps.app.goo.gl/LVh8Su1uvmKDictW7" target="_blank" rel="noopener noreferrer" class="location-link"> 📍 View on Map </a>
+     </div>
+    </div>
+<div class="gallery-card">
+     <div class="gallery-image">
+      <img src="sb21.jpg" alt="Sharana Basaveshwara Temple" class="gallery-img" loading="lazy">
+     </div>
+     <div class="gallery-info">
+      <h3>Sharana Basaveshwara Temple</h3>
+      <p>Stepping into the Sharana Basaveshwara Temple was like entering a realm where time slows down and devotion takes center stage. Nestled in the heart of Kalaburagi, this sacred site radiates a serene energy that instantly calms the mind</p><a href="https://maps.app.goo.gl/hAaERHvfMkDSsN5j6" target="_blank" rel="noopener noreferrer" class="location-link"> 📍 View on Map </a>
+     </div>
+    </div>
+   </div>
+  </section>
+  <section class="section culture-section" id="culture">
+   <h2 class="section-title" id="culture-title">Experience Local Culture</h2>
+   <div class="culture-grid">
+    <div class="culture-item">
+     <div class="culture-icon">
+      🍛
+     </div>
+     <h3>Cuisine</h3>
+     <p>Savor authentic North Karnataka dishes like Jolada Rotti, Ennegai, and the famous Kalaburagi Biryani</p>
+    </div>
+    <div class="culture-item">
+     <div class="culture-icon">
+      🎭
+     </div>
+     <h3>Festivals</h3>
+     <p>Experience vibrant celebrations during Urs festival, Ganesh Chaturthi, and traditional Kannada festivals</p>
+    </div>
+    <div class="culture-item">
+     <div class="culture-icon">
+      🛍️
+     </div>
+     <h3>Shopping</h3>
+     <p>Explore local markets for traditional handicrafts, Bidriware artifacts, and authentic Khadi textiles</p>
+    </div>
+    <div class="culture-item">
+     <div class="culture-icon">
+      🎵
+     </div>
+     <h3>Music &amp; Arts</h3>
+     <p>Immerse yourself in Sufi qawwali performances and traditional folk music at cultural events</p>
+    </div>
+   </div>
+  </section>
+  <footer class="footer">
+   <p id="footer-text">© 2024 Discover Kalaburagi - Explore the Heritage of Karnataka</p>
+   <p>Plan your visit and experience the timeless beauty of this historic city</p>
+   <div class="social-links"><a href="https://www.facebook.com/KalaburagiTourism" target="_blank" rel="noopener noreferrer" class="social-link" id="facebook-link"> <span class="social-icon"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></span> <span>Facebook</span> </a> <a href="https://www.instagram.com/explore/locations/kalaburagi" target="_blank" rel="noopener noreferrer" class="social-link" id="instagram-link"> <span class="social-icon"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0C8.74 0 8.333.015 7.053.072 5.775.132 4.905.333 4.117.6c-.798.272-1.559.645-2.39 1.476-.821.821-1.204 1.566-1.476 2.39-.266.792-.467 1.662-.527 2.94C.016 8.333 0 8.74 0 12s.015 3.667.072 4.947c.06 1.277.261 2.148.527 2.94.272.822.655 1.569 1.476 2.39.821.821 1.566 1.204 2.39 1.476.792.266 1.662.467 2.94.527C8.333 23.984 8.74 24 12 24s3.667-.015 4.947-.072c1.277-.06 2.148-.261 2.94-.527.822-.272 1.569-.655 2.39-1.476.821-.821 1.204-1.566 1.476-2.39.266-.792.467-1.662.527-2.94.058-1.28.072-1.687.072-4.947s-.015-3.667-.072-4.947c-.06-1.277-.261-2.148-.527-2.94-.272-.822-.655-1.569-1.476-2.39-.821-.821-1.566-1.204-2.39-1.476-.792-.266-1.662-.467-2.94-.527C15.667.016 15.26 0 12 0zm0 2.16c3.203 0 3.585.009 4.849.070 1.171.054 1.805.244 2.227.408.562.217.96.477 1.382.896.419.42.679.819.896 1.381.164.422.354 1.057.408 2.227.061 1.264.07 1.646.07 4.849s-.009 3.585-.07 4.849c-.054 1.171-.244 1.805-.408 2.227-.217.562-.477.96-.896 1.382-.42.419-.819.679-1.381.896-.422.164-1.057.354-2.227.408-1.264.061-1.646.07-4.849.07s-3.585-.009-4.849-.07c-1.171-.054-1.805-.244-2.227-.408-.562-.217-.96-.477-1.382-.896-.419-.42-.679-.819-.896-1.381-.164-.422-.354-1.057-.408-2.227-.061-1.264-.07-1.646-.07-4.849s.009-3.585.07-4.849c.054-1.171.244-1.805.408-2.227.217-.562.477-.96.896-1.382.42-.419.819-.679 1.381-.896.422-.164 1.057-.354 2.227-.408 1.264-.061 1.646-.07 4.849-.07l.045.002z"/></svg></span> <span>Instagram</span> </a> <a href="https://twitter.com/search?q=kalaburagi%20tourism" target="_blank" rel="noopener noreferrer" class="social-link" id="twitter-link"> <span class="social-icon"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M23.953 4.57a10 10 0 002.856-3.215c-1.43.613-2.98 1.052-4.59 1.241 1.645-.984 2.906-2.537 3.506-4.38-1.537.926-3.242 1.599-5.061 1.961-1.453-1.548-3.524-2.516-5.822-2.516-4.407 0-7.984 3.577-7.984 7.984 0 .626.068 1.235.202 1.82-6.633-.331-12.515-3.51-16.458-8.35-.686 1.179-1.08 2.549-1.08 4.013 0 2.769 1.41 5.213 3.55 6.652-1.31-.041-2.55-.402-3.631-1.005v.101c0 3.866 2.748 7.086 6.393 7.83-1.674.458-3.436.459-5.113.166 1.41 4.383 5.546 7.577 10.428 7.667-2.727 2.138-6.164 3.41-9.9 3.41-.643 0-1.278-.037-1.901-.111 3.55 2.277 7.784 3.605 12.321 3.605 14.785 0 22.848-12.244 22.848-22.848 0-.348-.007-.694-.02-1.04 1.571-1.133 2.938-2.554 4.016-4.171z"/></svg></span> <span>Twitter</span> </a>
+   </div>
+  </footer>
+  <script>
+    const defaultConfig = {
+      background_color: "#667eea",
+      surface_color: "#ffffff",
+      text_color: "#2c3e50",
+      primary_action_color: "#764ba2",
+      secondary_action_color: "#f5576c",
+      font_family: "Segoe UI",
+      font_size: 16,
+      city_name: "Kalaburagi",
+      tagline: "Where History Meets Heritage",
+      hero_description: "Discover the ancient capital of the Bahmani Sultanate, a city rich in architectural marvels, spiritual significance, and cultural treasures",
+      cta_button: "Explore Now",
+      about_title: "About Kalaburagi",
+      attractions_title: "Must-Visit Attractions",
+      culture_title: "Experience Local Culture",
+      footer_text: "© 2024 Discover Kalaburagi - Explore the Heritage of Karnataka"
+    };
+
+    async function onConfigChange(config) {
+      const backgroundColor = config.background_color || defaultConfig.background_color;
+      const surfaceColor = config.surface_color || defaultConfig.surface_color;
+      const textColor = config.text_color || defaultConfig.text_color;
+      const primaryActionColor = config.primary_action_color || defaultConfig.primary_action_color;
+      const secondaryActionColor = config.secondary_action_color || defaultConfig.secondary_action_color;
+      const customFont = config.font_family || defaultConfig.font_family;
+      const baseSize = config.font_size || defaultConfig.font_size;
+      const baseFontStack = 'Tahoma, Geneva, Verdana, sans-serif';
+
+      document.body.style.fontFamily = `${customFont}, ${baseFontStack}`;
+      document.body.style.fontSize = `${baseSize}px`;
+      document.body.style.color = textColor;
+
+      const hero = document.querySelector('.hero');
+      hero.style.background = `linear-gradient(135deg, ${backgroundColor} 0%, ${primaryActionColor} 100%)`;
+
+      const navbar = document.querySelector('.navbar');
+      navbar.style.background = `rgba(${hexToRgb(surfaceColor)}, 0.95)`;
+
+      const navLinks = document.querySelectorAll('.nav-links a');
+      navLinks.forEach(link => {
+        link.style.color = textColor;
+      });
+
+      const logo = document.getElementById('logo');
+      logo.style.background = `linear-gradient(135deg, ${backgroundColor} 0%, ${primaryActionColor} 100%)`;
+      logo.style.webkitBackgroundClip = 'text';
+      logo.style.backgroundClip = 'text';
+
+      const ctaButton = document.querySelector('.cta-button');
+      ctaButton.style.background = surfaceColor;
+      ctaButton.style.color = backgroundColor;
+
+      const sectionTitles = document.querySelectorAll('.section-title');
+      sectionTitles.forEach(title => {
+        title.style.color = textColor;
+        title.style.fontSize = `${baseSize * 2.5}px`;
+      });
+
+      const sectionTitleAfters = document.querySelectorAll('.section-title::after');
+      const style = document.createElement('style');
+      style.textContent = `.section-title::after { background: linear-gradient(135deg, ${backgroundColor} 0%, ${primaryActionColor} 100%) !important; }`;
+      document.head.appendChild(style);
+
+      const attractionCards = document.querySelectorAll('.attraction-card');
+      attractionCards.forEach(card => {
+        card.style.background = surfaceColor;
+      });
+
+      const attractionTitles = document.querySelectorAll('.attraction-info h3');
+      attractionTitles.forEach(title => {
+        title.style.color = textColor;
+        title.style.fontSize = `${baseSize * 1.5}px`;
+      });
+
+      const cultureItems = document.querySelectorAll('.culture-item');
+      cultureItems.forEach(item => {
+        item.style.background = surfaceColor;
+      });
+
+      const cultureTitles = document.querySelectorAll('.culture-item h3');
+      cultureTitles.forEach(title => {
+        title.style.color = textColor;
+        title.style.fontSize = `${baseSize * 1.3}px`;
+      });
+
+      const heroTitle = document.querySelector('.hero h1');
+      heroTitle.style.fontSize = `${baseSize * 4}px`;
+
+      const heroTagline = document.querySelector('.hero .tagline');
+      heroTagline.style.fontSize = `${baseSize * 1.5}px`;
+
+      const heroDesc = document.querySelector('.hero p');
+      heroDesc.style.fontSize = `${baseSize * 1.2}px`;
+
+      const aboutContent = document.querySelector('.about-content');
+      aboutContent.style.fontSize = `${baseSize * 1.1}px`;
+
+      document.getElementById('city-name').textContent = config.city_name || defaultConfig.city_name;
+      document.getElementById('tagline').textContent = config.tagline || defaultConfig.tagline;
+      document.getElementById('hero-description').textContent = config.hero_description || defaultConfig.hero_description;
+      document.getElementById('cta-button').textContent = config.cta_button || defaultConfig.cta_button;
+      document.getElementById('about-title').textContent = config.about_title || defaultConfig.about_title;
+      document.getElementById('attractions-title').textContent = config.attractions_title || defaultConfig.attractions_title;
+      document.getElementById('culture-title').textContent = config.culture_title || defaultConfig.culture_title;
+      document.getElementById('footer-text').textContent = config.footer_text || defaultConfig.footer_text;
+    }
+
+    function hexToRgb(hex) {
+      const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+      return result ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` : '255, 255, 255';
+    }
+
+    function mapToCapabilities(config) {
+      return {
+        recolorables: [
+          {
+            get: () => config.background_color || defaultConfig.background_color,
+            set: (value) => {
+              config.background_color = value;
+              if (window.elementSdk) window.elementSdk.setConfig({ background_color: value });
+            }
+          },
+          {
+            get: () => config.surface_color || defaultConfig.surface_color,
+            set: (value) => {
+              config.surface_color = value;
+              if (window.elementSdk) window.elementSdk.setConfig({ surface_color: value });
+            }
+          },
+          {
+            get: () => config.text_color || defaultConfig.text_color,
+            set: (value) => {
+              config.text_color = value;
+              if (window.elementSdk) window.elementSdk.setConfig({ text_color: value });
+            }
+          },
+          {
+            get: () => config.primary_action_color || defaultConfig.primary_action_color,
+            set: (value) => {
+              config.primary_action_color = value;
+              if (window.elementSdk) window.elementSdk.setConfig({ primary_action_color: value });
+            }
+          },
+          {
+            get: () => config.secondary_action_color || defaultConfig.secondary_action_color,
+            set: (value) => {
+              config.secondary_action_color = value;
+              if (window.elementSdk) window.elementSdk.setConfig({ secondary_action_color: value });
+            }
+          }
+        ],
+        borderables: [],
+        fontEditable: {
+          get: () => config.font_family || defaultConfig.font_family,
+          set: (value) => {
+            config.font_family = value;
+            if (window.elementSdk) window.elementSdk.setConfig({ font_family: value });
+          }
+        },
+        fontSizeable: {
+          get: () => config.font_size || defaultConfig.font_size,
+          set: (value) => {
+            config.font_size = value;
+            if (window.elementSdk) window.elementSdk.setConfig({ font_size: value });
+          }
+        }
+      };
+    }
+
+    function mapToEditPanelValues(config) {
+      return new Map([
+        ["city_name", config.city_name || defaultConfig.city_name],
+        ["tagline", config.tagline || defaultConfig.tagline],
+        ["hero_description", config.hero_description || defaultConfig.hero_description],
+        ["cta_button", config.cta_button || defaultConfig.cta_button],
+        ["about_title", config.about_title || defaultConfig.about_title],
+        ["attractions_title", config.attractions_title || defaultConfig.attractions_title],
+        ["culture_title", config.culture_title || defaultConfig.culture_title],
+        ["footer_text", config.footer_text || defaultConfig.footer_text]
+      ]);
+    }
+
+    if (window.elementSdk) {
+      window.elementSdk.init({
+        defaultConfig,
+        onConfigChange,
+        mapToCapabilities,
+        mapToEditPanelValues
+      });
+    }
+
+    window.addEventListener('scroll', () => {
+      const navbar = document.getElementById('navbar');
+      if (window.scrollY > 50) {
+        navbar.classList.add('scrolled');
+      } else {
+        navbar.classList.remove('scrolled');
+      }
+    });
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+          });
+        }
+      });
+    });
+
+    // Carousel functionality
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.carousel-slide');
+    const totalSlides = slides.length;
+    const dotsContainer = document.getElementById('carousel-dots');
+
+    // Create dots
+    for (let i = 0; i < totalSlides; i++) {
+      const dot = document.createElement('div');
+      dot.className = 'carousel-dot' + (i === 0 ? ' active' : '');
+      dot.onclick = () => goToSlide(i);
+      dotsContainer.appendChild(dot);
+    }
+
+    function moveCarousel(direction) {
+      currentSlide += direction;
+      if (currentSlide >= totalSlides) currentSlide = 0;
+      if (currentSlide < 0) currentSlide = totalSlides - 1;
+      updateCarousel();
+    }
+
+    function goToSlide(index) {
+      currentSlide = index;
+      updateCarousel();
+    }
+
+    function updateCarousel() {
+      slides.forEach((slide, index) => {
+        slide.classList.toggle('active', index === currentSlide);
+      });
+      
+      const dots = document.querySelectorAll('.carousel-dot');
+      dots.forEach((dot, index) => {
+        dot.classList.toggle('active', index === currentSlide);
+      });
+    }
+
+    // Auto-advance carousel with pause on hover and touch support
+    let autoAdvance = setInterval(() => moveCarousel(1), 5000);
+
+    const carouselContainerEl = document.querySelector('.carousel-container');
+    if (carouselContainerEl) {
+      carouselContainerEl.addEventListener('mouseenter', () => {
+        clearInterval(autoAdvance);
+      });
+      carouselContainerEl.addEventListener('mouseleave', () => {
+        clearInterval(autoAdvance);
+        autoAdvance = setInterval(() => moveCarousel(1), 5000);
+      });
+    }
+
+    // Touch/swipe support for mobile
+    let touchStartX = null;
+    const carouselEl = document.getElementById('carousel');
+    if (carouselEl) {
+      carouselEl.addEventListener('touchstart', (e) => {
+        touchStartX = e.touches[0].clientX;
+      }, { passive: true });
+
+      carouselEl.addEventListener('touchend', (e) => {
+        if (touchStartX === null) return;
+        const touchEndX = e.changedTouches[0].clientX;
+        const diff = touchStartX - touchEndX;
+        if (Math.abs(diff) > 40) {
+          moveCarousel(diff > 0 ? 1 : -1);
+        }
+        touchStartX = null;
+      });
+    }
+
+    // Make moveCarousel available globally
+    window.moveCarousel = moveCarousel;
+
+    // Improve slide rendering: copy <img> src to parent background-image and hide the <img>
+    // Background-size: cover often yields better visual scaling for full-bleed hero slides.
+    (function applySlideBackgrounds() {
+      const slides = document.querySelectorAll('.carousel-slide');
+      slides.forEach(slide => {
+        const img = slide.querySelector('img');
+        const src = img ? (img.currentSrc || img.src) : null;
+        if (src) {
+          // set as CSS background
+          slide.style.backgroundImage = `url('${src}')`;
+          // hide the <img> to avoid double rendering but keep it for accessibility
+          img.style.display = 'none';
+          img.setAttribute('aria-hidden', 'true');
+        }
+      });
+    })();
+
+    // Responsive nav toggle behavior
+    (function() {
+      const navToggle = document.getElementById('navToggle');
+      const navLinks = document.getElementById('navLinks');
+  const focusableLinks = navLinks ? navLinks.querySelectorAll('a') : [];
+  if (navLinks) navLinks.setAttribute('aria-hidden', 'true');
+
+      function setExpanded(val) {
+        if (navToggle) navToggle.setAttribute('aria-expanded', String(val));
+        const navbarEl = document.getElementById('navbar');
+        if (navLinks) {
+          if (val) navLinks.classList.add('open'); else navLinks.classList.remove('open');
+          navLinks.setAttribute('aria-hidden', String(!val));
+        }
+        // toggle .open on navbar for CSS visibility
+        if (navbarEl) navbarEl.classList.toggle('open', !!val);
+        // lock body scroll when open on small screens
+        if (val) document.body.style.overflow = 'hidden'; else document.body.style.overflow = '';
+      }
+
+      if (navToggle && navLinks) {
+          navToggle.addEventListener('click', () => {
+            const expanded = navToggle.getAttribute('aria-expanded') === 'true';
+            // also toggle a class on the navbar for more reliable styling
+            const navbarEl = document.getElementById('navbar');
+            if (navbarEl) navbarEl.classList.toggle('open', !expanded);
+            setExpanded(!expanded);
+          });
+
+        // close menu when a link is clicked (mobile)
+        focusableLinks.forEach(a => a.addEventListener('click', () => setExpanded(false)));
+
+        // close on escape
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape') setExpanded(false);
+        });
+      }
+    })();
+  </script>
+ <script>
+   // Insert star ratings into each gallery card. Uses data-rating on .gallery-card if provided, else defaults to 4.5
+   (function addGalleryRatings(){
+     const cards = document.querySelectorAll('.gallery-card');
+     if(!cards.length) return;
+
+     cards.forEach((card, idx) => {
+       const rating = parseFloat(card.dataset.rating) || 4.5;
+       const full = Math.floor(rating);
+       const half = (rating - full) >= 0.5 ? 1 : 0;
+       const empty = 5 - full - half;
+
+       const container = document.createElement('div');
+       container.className = 'rating';
+       container.setAttribute('role','img');
+       container.setAttribute('aria-label', `Rating ${rating} out of 5`);
+
+       for (let i=0;i<full;i++) container.innerHTML += fullStarSVG();
+       if (half) container.innerHTML += halfStarSVG('grad-'+idx);
+       for (let i=0;i<empty;i++) container.innerHTML += emptyStarSVG();
+
+       const info = card.querySelector('.gallery-info');
+       if (info) info.insertBefore(container, info.firstChild);
+     });
+
+     function fullStarSVG(){
+       return '<svg viewBox="0 0 24 24" fill="#FFD166" aria-hidden="true"><path d="M12 .587l3.668 7.431 8.2 1.192-5.934 5.788 1.402 8.18L12 18.896l-7.336 3.882 1.402-8.18L.132 9.21l8.2-1.192z"/></svg>';
+     }
+     function emptyStarSVG(){
+       return '<svg viewBox="0 0 24 24" fill="#e6e6e6" aria-hidden="true"><path d="M12 .587l3.668 7.431 8.2 1.192-5.934 5.788 1.402 8.18L12 18.896l-7.336 3.882 1.402-8.18L.132 9.21l8.2-1.192z"/></svg>';
+     }
+     function halfStarSVG(id){
+       return `<svg viewBox="0 0 24 24" aria-hidden="true"><defs><linearGradient id="${id}" x1="0" x2="1"><stop offset="50%" stop-color="#FFD166"/><stop offset="50%" stop-color="#e6e6e6"/></linearGradient></defs><path fill="url(#${id})" d="M12 .587l3.668 7.431 8.2 1.192-5.934 5.788 1.402 8.18L12 18.896l-7.336 3.882 1.402-8.18L.132 9.21l8.2-1.192z"/></svg>`;
+     }
+   })();
+ </script>
+</body>
+</html>
